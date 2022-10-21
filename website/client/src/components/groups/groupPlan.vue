@@ -54,7 +54,7 @@
       </div>
       <!-- Upgrading an existing group -->
       <div
-        v-if="upgradingGroup._id"
+        v-if="false && upgradingGroup._id"
         id="upgrading-group"
         class="container payment-options"
       >
@@ -94,17 +94,13 @@
               </div>
             </div>
             <div class="box payment-providers">
-              <payments-buttons
-                :stripe-fn="() => pay(PAYMENTS.STRIPE)"
-                :amazon-data="pay(PAYMENTS.AMAZON)"
-              />
             </div>
           </div>
         </div>
       </div>
       <!-- Create a new group -->
       <div
-        v-if="!upgradingGroup._id"
+        v-if="true || !upgradingGroup._id"
         class="container col-6 offset-3 create-option"
       >
         <div class="row">
@@ -116,7 +112,7 @@
           <div class="col-12 text-center">
             <button
               class="btn btn-primary create-group"
-              @click="launchModal('create-page')"
+              @click="createGroup()"
             >
               Create Your New Group!
             </button>
@@ -356,12 +352,10 @@ import axios from 'axios';
 import paymentsMixin from '../../mixins/payments';
 import { mapState } from '@/libs/store';
 import positiveIcon from '@/assets/svg/positive.svg';
-import paymentsButtons from '@/components/payments/buttons/list';
 import groupPlanCreationModal from '../group-plans/groupPlanCreationModal';
 
 export default {
   components: {
-    paymentsButtons,
     groupPlanCreationModal,
   },
   mixins: [paymentsMixin],
