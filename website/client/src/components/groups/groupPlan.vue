@@ -352,6 +352,7 @@
 </style>
 
 <script>
+import axios from 'axios';
 import paymentsMixin from '../../mixins/payments';
 import { mapState } from '@/libs/store';
 import positiveIcon from '@/assets/svg/positive.svg';
@@ -379,11 +380,11 @@ export default {
         AMAZON: 'amazon',
         STRIPE: 'stripe',
       },
-      paymentMethod: '',
+      paymentMethod: 'magic',
       newGroup: {
         type: 'guild',
         privacy: 'private',
-        name: '',
+        name: 'My Group',
         leaderOnly: {
           challenges: false,
         },
@@ -412,35 +413,20 @@ export default {
     launchModal () {
       this.$root.$emit('bv::show::modal', 'create-group');
     },
-    createGroup () {
-      this.changePage(this.PAGES.PAY);
-    },
-    pay (paymentMethod) {
-      const subscriptionKey = 'group_monthly'; // @TODO: Get from content API?
-      const paymentData = {
-        subscription: subscriptionKey,
-        coupon: null,
-      };
+    async createGroup () {
+      const response = await axios.post('/api/v3/groups/create-plan', {
+        groupToCreate: this.newGroup,
+      });
 
-      if (this.upgradingGroup && this.upgradingGroup._id) {
-        paymentData.groupId = this.upgradingGroup._id;
-        paymentData.group = this.upgradingGroup;
-      } else {
-        paymentData.groupToCreate = this.newGroup;
+      if (response.status >= 400) {
+        alert(`Error: ${response.message}`);
+        return;
       }
 
-      this.paymentMethod = paymentMethod;
-
-      if (this.paymentMethod === this.PAYMENTS.AMAZON) {
-        paymentData.type = 'subscription';
-        return paymentData;
-      }
-
-      if (this.paymentMethod === this.PAYMENTS.STRIPE) {
-        this.redirectToStripe(paymentData);
-      }
-
-      return null;
+      const newGroup = response.data.data;
+      this.user.guilds.push(newGroup._id);
+      this.$store.state.groupPlans.push(newGroup);
+      this.$router.push(`/group-plans/${newGroup._id}/task-information`);
     },
   },
 };
